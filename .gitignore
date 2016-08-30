@@ -1,29 +1,68 @@
-# Compiled Object files
+# ==============================================================================
+# Below we forbid everything and only allow what we know, that's much easier
+# than blocking about 500 different test files and bug report outputs.
+# ==============================================================================
+/.*
+/*
+!/examples
+!/src
+!/test
+!/.gitignore
+!/CMakeLists.txt
+!/doxyfile
+!/LICENSE
+!/pch2csv.pro
+!/README.md
+!/version.pri
+
+
+# =======================================
+# Reject some generic files
+# =======================================
+*~
+*.rej
+*.orig
+*.bak
+
+# C++ objects and libs
 *.slo
 *.lo
 *.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
 *.a
-*.lib
+*.la
+*.lai
+*.so
+# *.dll
+*.dylib
 
-# Executables
-*.exe
-*.out
-*.app
+# Qt-es
+
+/.qmake.cache
+/.qmake.stash
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+*.moc
+moc_*.cpp
+qrc_*.cpp
+ui_*.h
+Makefile*
+*build-*
+
+# QtCreator
+
+*.autosave
+
+# QtCtreator Qml
+*.qmlproject.user
+*.qmlproject.user.*
+
+# QtCtreator CMake
+CMakeLists.txt.user*
+
+# =======================================
+# And reject some specific files
+# =======================================
+/scripts
+

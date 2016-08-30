@@ -1,11 +1,15 @@
 project(pch2csv)
 
-set(PCH2CSV_VERSION "1.0.0")
-set(PACKAGE_VERSION_MAJOR "1")
-set(PACKAGE_VERSION_MINOR "0")
-set(PACKAGE_VERSION_PATCH "0")
-set(PACKAGE_VERSION "${PACKAGE_VERSION_MAJOR}.${PACKAGE_VERSION_MINOR}.${PACKAGE_VERSION_PATCH}")
+### Versioning
+set(pch2csv_VERSION_MAJOR "1")
+set(pch2csv_VERSION_MINOR "0")
+set(pch2csv_VERSION_PATCH "0")
+set(pch2csv_VERSION "${pch2csv_VERSION_MAJOR}.${pch2csv_VERSION_MINOR}.${pch2csv_VERSION_PATCH}")
 
+configure_file( ./src/config.h.cmake ./src/config.h )
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
+### CMake Compiler Options
 cmake_minimum_required(VERSION 2.6.0 FATAL_ERROR)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
@@ -16,23 +20,14 @@ if(NOT CMAKE_BUILD_TYPE)
             FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
 
+### Sources
 set(MY_SOURCES
     ./src/scanner.h
     ./src/scanner.cpp
+    ./src/systemdetection.h
     ./src/version.h
     ./src/main.cpp
     )
 
 add_executable(pch2csv WIN32 ${MY_SOURCES})
-
-
-### Windows shell lightweight utility functions
-if(WIN32)
-    set(YOUR_LIBRARIES ${YOUR_LIBRARIES} "-lShlwapi")
-else()
-    set(SHLWAPI)
-endif()
-
-
-target_link_libraries(pch2csv ${YOUR_LIBRARIES})
 

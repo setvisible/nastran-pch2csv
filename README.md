@@ -85,23 +85,29 @@ This feature can be disabled with `-u`.
 
 3. Build with CMake
 
-        $ mkdir -p build
-        $ cd build/
-        $ cmake ..
-
      - On Unix / Mac OS X
 
-            $ make && make install
+            $ mkdir -p build
+            $ cd build/
+            $ cmake ..
+            $ make -j4
+            $ make install
 
      - On Windows (MinGW)
 
-            > make
+            > mkdir -p build
+            > cd build/
+            > cmake .. -G "MinGW Makefiles"
+            > make -j4
 
      - On Windows (MSVC)
 
+            > mkdir -p build
+            > cd build/
+            > cmake .. -G "Visual Studio 14 2015"
             > start .
 
-         Then, double click the Visual Studio project.
+         Then, double click the Visual Studio project (vcxproj).
 
 
 ## Usage

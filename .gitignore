@@ -5,8 +5,10 @@
 /.*
 /*
 !/examples
+!/images
 !/src
 !/test
+!/utils
 !/.gitignore
 !/CMakeLists.txt
 !/doxyfile

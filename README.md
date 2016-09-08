@@ -2,14 +2,14 @@
 
 ## Description
 
-A simple tool to convert Nastran Punch output to CSV.
+A simple tool to convert [Nastran](https://en.wikipedia.org/wiki/Nastran "NASA Nastran") Punch format to [CSV](https://en.wikipedia.org/wiki/Comma-separated_values "Comma-Separated Values (CSV)").
 
-It is written in C++ and uses the standard library.
+It is written in C++ and uses the [standard library](https://en.wikipedia.org/wiki/C%2B%2B_Standard_Library "C++ standard library").
 
 ## Features
 
 The tool reads a Nastran Punch file (`*.pch`) and converts its scary format to
-Comma-Separated Format (`*.csv`) readable by Calc or Excel.
+Comma-Separated Format (`*.csv`) readable by [Calc](https://en.wikipedia.org/wiki/LibreOffice_Calc "LibreOffice Calc") or [Excel](https://en.wikipedia.org/wiki/Microsoft_Excel "Microsoft Excel").
 
 
 Basically, it converts this:
@@ -38,15 +38,14 @@ to this:
 
 __Remark:__
 
-The **NASTRAN solver** produces PUNCH file as a result of FEA (Finite Element Analysis)
-if the `PUNCH` keyword replaces the default `PRINT` or `PLOT` in the output choices of
-the FE model's `CASE CONTROL` section.
+The **Natran solver** produces PUNCH file as a result of a [FEA](https://en.wikipedia.org/wiki/Finite_element_analysis "Finite Element Analysis (FEA)") if the `PUNCH` keyword replaces the default `PRINT` or `PLOT` in the output choices of
+the Finite Element model `CASE CONTROL` section.
 
 
 For instance, if we want the displacement result as PUNCH file, we add
-`DISPLACEMENT(SORT1,PUNCH,REAL)=ALL` to the FE model's `CASE CONTROL` section.
+`DISPLACEMENT(SORT1,PUNCH,REAL)=ALL` to the FE model `CASE CONTROL` section.
 
-Punch are sometimes more 'readable' than the F06 (`PRINT`'s default format).
+Punch are sometimes more 'readable' than the F06 (`PRINT` default format).
 
 __Remark 2:__
 

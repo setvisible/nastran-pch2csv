@@ -4,6 +4,9 @@ CONFIG      += testcase
 QT           = core testlib
 SOURCES     += tst_csvcomparer.cpp
 
+# Include:
+INCLUDEPATH += ../../include
+
 # Dependancies:
-HEADERS += csvcomparer.h
-SOURCES += csvcomparer.cpp
+HEADERS += ../../utils/csvcomparer.h
+SOURCES += ../../utils/csvcomparer.cpp

@@ -16,7 +16,7 @@
 #include <QtTest/QtTest>
 #include <QtCore/QDebug>
 
-#include "csvcomparer.h"
+#include <CSVComparer.h>
 
 using namespace std;
 

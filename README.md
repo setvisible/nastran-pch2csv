@@ -73,6 +73,31 @@ will produce these files:
 Note that the tool **warns** when it meets the issue.
 This feature can be disabled with `-u`.
 
+## Under the hood
+
+### Simple case
+
+The simplest case is given below.
+We have one Punch, containing one format.
+That gives a simple output file.
+
+![Simple case](images/unique.png)
+
+### Concatenate the punch files in an unique output
+
+If several files are proceeded, the tool concatenates them in an unique output file.
+This does too, if the `-u` flag is set.
+
+![Concatenate the Punch](images/concat.png)
+
+### Split formats in separated files
+
+If the `-u` flag is **not** set, the tool might output several files,
+one per format found in the punch file(s).
+
+![Formats](images/combo.png)
+
+
 
 ## Build
 

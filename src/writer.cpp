@@ -17,69 +17,164 @@
 
 #include "punchfile.h"
 
-#include <string>
 #include <assert.h>
 #include <ostream>
+#include <string>
+
+static const char str_separator[] = ";";
+static const char str_quote[]     = "\"";
+static const char str_unknown[]   = "unknown";
 
 using namespace std;
 
+/*! \class Writer
+ *  \brief The class Writer converts a \a PunchFile into a CSV stream.
+ *
+ * For each PunchBlock in the PunchFile, use \a writeCSV() to output the stream.
+ * The function returns \a true is correctly written, otherwise \a false.
+ *
+ * \example
+ *
+ * \code
+ * // std::ofstream ofs;
+ * // PunchFile pch;
+ * Writer writer;
+ * for (auto & key : pch.blockKeys()) {
+ *      auto br = pch.blockRange(key);
+ *      for (auto b = br.first; b != br.second; ++b) {
+ *          PunchBlock block = b->second;
+ *          writer.writeCSV(block, &ofs);
+ *      }
+ *  }
+ * \endcode
+ */
+/*! \brief Constructor.
+ */
+Writer::Writer()
+    : m_headerEnable(HeaderType::Default)
+    , m_userDefinedHeader(string())
+    , m_previousLeftHeaders(string())
+{
+}
+
+/*! \brief Constructor.
+ */
+Writer::Writer(const std::string &columnHeaderLine,
+               const bool skipColumnHeaders)
+{
+    if (skipColumnHeaders) {
+        m_headerEnable = Writer::HeaderType::NoHeader;
+    } else {
+        if ( !columnHeaderLine.empty() ) {
+            m_headerEnable = Writer::HeaderType::UserDefined;
+            m_userDefinedHeader = columnHeaderLine;
+
+        } else {
+            m_headerEnable = Writer::HeaderType::Default;
+        }
+    }
+}
 
 /******************************************************************************
  ******************************************************************************/
-bool Writer::writeCSV(const PunchFile_Ptr pch, std::ostream * const odevice)
+void Writer::enableHeader(const HeaderType enable)
+{
+    m_headerEnable = enable;
+}
+
+void Writer::setHeader(const std::string &header)
+{
+    m_userDefinedHeader = header;
+}
+
+/******************************************************************************
+ ******************************************************************************/
+inline const char* Writer::separator()
+{
+    return str_separator;
+}
+
+inline const char* Writer::quote()
+{
+    return str_quote;
+}
+
+inline const char* Writer::unknown()
+{
+    return str_unknown;
+}
+
+/******************************************************************************
+ ******************************************************************************/
+bool Writer::writeCSV(PunchBlock &block, std::ostream * const odevice)
 {
     assert(odevice);
-    assert(pch);
 
-    string previousLeftHeaders;
+    /* **************************************** */
+    /* Prepare the header and the common rows   */
+    /* **************************************** */
+    string defaultBlockHeader;
+    string prefixHeader;
+    string prefixRow;
 
-    for (PunchBlock & block : pch->blocks()) {
+    for (std::pair<const string, string> &var : block.prefixRowAndHeader()) {
+        prefixHeader += quote();
+        prefixHeader += var.first;
+        prefixHeader += quote();
+        prefixHeader += separator();
+        prefixRow += quote();
+        prefixRow += var.second;
+        prefixRow += quote();
+        prefixRow += separator();
+    }
 
-        /* **************************************** */
-        /* Prepare the header and the common rows   */
-        /* **************************************** */
-        string leftHeaders;
-        string leftRows;
-        for (std::pair<const string, string> &var : block.globalVars) {
-            leftHeaders += var.first;
-            leftHeaders += ",";
-            leftRows += var.second;
-            leftRows += ",";
-        }
-        if (!block.rows().empty()) {
-            PunchRow r = block.rows().front();
-            for (int i = r.size(); i>0; --i) {
-                leftHeaders += "unknown,";
-            }
-        }
+    for( int i = block.columnCount(); i>0; --i) {
+        defaultBlockHeader += quote();
+        defaultBlockHeader += unknown();
+        defaultBlockHeader += quote();
+        defaultBlockHeader += separator();
+    }
 
-        /* **************************************** */
-        /* Write the header                         */
-        /* **************************************** */
-        if (leftHeaders != previousLeftHeaders) {
-            (*odevice) << leftHeaders;
+    /* **************************************** */
+    /* Write the header                         */
+    /* **************************************** */
+    string defaultHeader = prefixHeader + defaultBlockHeader;
+    if (defaultHeader != m_previousLeftHeaders) {
+
+        switch(m_headerEnable) {
+        case HeaderType::NoHeader:
+            break;
+        case HeaderType::UserDefined:
+            (*odevice) << prefixHeader;
+            (*odevice) << m_userDefinedHeader;
             (*odevice) << std::endl;
-            previousLeftHeaders = leftHeaders;
+            break;
+        case HeaderType::Default:
+        default:
+            (*odevice) << defaultHeader;
+            (*odevice) << std::endl;
+            break;
         }
 
-        /* **************************************** */
-        /* Write the rows                           */
-        /* **************************************** */
-        if (!block.rows().empty()) {
-            for (PunchRow &row : block.rows()) {
-                (*odevice) << leftRows;
+        m_previousLeftHeaders = defaultHeader;
+    }
 
-                for (const auto& field : row) {
+    /* **************************************** */
+    /* Write the rows                           */
+    /* **************************************** */
+    if (!block.rows().empty()) {
+        for (PunchRow &row : block.rows()) {
+            (*odevice) << prefixRow;
 
-                    (*odevice) << field;
-                    (*odevice) << ",";
-
-                }
-                (*odevice) << std::endl;
+            for (const auto& field : row) {
+                (*odevice) << quote();
+                (*odevice) << field;
+                (*odevice) << quote();
+                (*odevice) << separator();
             }
+            (*odevice) << std::endl;
         }
     }
 
-
-
+    return true;
 }

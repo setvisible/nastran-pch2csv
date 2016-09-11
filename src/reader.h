@@ -22,19 +22,27 @@
 #include <string>
 #include <vector>
 
+/*!
+ * C_ERROR_MESSAGES_SIZE
+ *
+ * We define a maximum of messages to be shown,
+ * in order to avoid too many messages.
+ */
+#define C_ERROR_MESSAGES_SIZE 100
+
+
 class Reader
 {
 public:
     explicit Reader();
 
     /* Read */
-    PunchFile_Ptr parsePUNCH(std::istream * const idevice);
+    PunchFile parsePUNCH(std::istream * const idevice);
 
     /* Get detailed warning messages, if any. */
-    std::vector<std::string>& getWarnings();
+    std::vector<std::string> getWarnings() const;
 
 private:
-    void trimRightRow(PunchRow * const row);
     void warn(const int lineCounter, const std::string &message);
     std::vector<std::string> m_warningMessages;
 

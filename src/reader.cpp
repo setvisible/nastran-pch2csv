@@ -16,20 +16,18 @@
 #include "reader.h"
 
 #include <assert.h>
-#include <istream>
-#include <stdio.h>
-#include <string>
-#include <vector>
-
-/* We define a maximum of messages to be shown,  */
-/* in order to avoid too many messages.          */
-#define C_ERROR_MESSAGES_SIZE 100
 
 using namespace std;
 
-
-/******************************************************************************
- ******************************************************************************/
+/*! \class Reader
+ *  \brief The class Reader is a parser for PUNCH format streams.
+ *
+ * The Reader stores the data into a \a PunchFile.
+ * Use \a parsePUNCH() to parse a stream.
+ *
+ * To check the errors after the parsing, use \a getWarnings().
+ *
+ */
 /*! \brief Constructor.
  */
 Reader::Reader()
@@ -39,15 +37,23 @@ Reader::Reader()
 
 /******************************************************************************
  ******************************************************************************/
-std::vector<std::string>& Reader::getWarnings()
+std::vector<string> Reader::getWarnings() const
 {
     return m_warningMessages;
 }
 
+
+/******************************************************************************
+ ******************************************************************************/
 void Reader::warn(const int lineCounter, const std::string &message)
 {
-    if (m_warningMessages.size() >= C_ERROR_MESSAGES_SIZE)
+    if (m_warningMessages.size() == C_ERROR_MESSAGES_SIZE) {
+        std::string limitMsg("[Warning] Too many errors...");
+        m_warningMessages.push_back( limitMsg );
+    }
+    if (m_warningMessages.size() >= C_ERROR_MESSAGES_SIZE) {
         return;
+    }
 
     std::string msg("[Warning] line "
                     + std::to_string(lineCounter)
@@ -99,15 +105,31 @@ static inline bool startsWith(const std::string &text, const std::string &start)
     return true;
 }
 
+/******************************************************************************
+ ******************************************************************************/
+static void trimRightRow(PunchRow * const row)
+{
+    if (!row) return;
+    int i = row->size();
+    while (i>0) {
+        --i;
+        if ( row->at(i) != "" ) return;
+        row->pop_back();
+    }
+}
 
 /******************************************************************************
  ******************************************************************************/
-
-PunchFile_Ptr Reader::parsePUNCH(std::istream * const idevice)
+PunchFile Reader::parsePUNCH(std::istream * const idevice)
 {
     assert(idevice);
 
-    PunchFile_Ptr pch {new PunchFile};
+    PunchFile pch;
+
+    std::list<PunchBlock> blocks;
+
+    PunchRow currentRow;
+
     PunchBlock *currentblock = 0;
     bool isHeaderSection = false;
 
@@ -128,8 +150,16 @@ PunchFile_Ptr Reader::parsePUNCH(std::istream * const idevice)
         /* ********************* */
         if( line.front() == '$' ){
 
+            /* Flush */
+            trimRightRow( &currentRow );
+            currentblock->append( currentRow );
+            currentRow = PunchRow();
+
             if (!isHeaderSection) {
-                currentblock = pch->appendBlock();
+
+                blocks.push_back( PunchBlock() );
+                currentblock = &(blocks.back());
+
                 isHeaderSection = true;
             }
 
@@ -143,7 +173,7 @@ PunchFile_Ptr Reader::parsePUNCH(std::istream * const idevice)
                 string value_trimmed = trim(value, " \t" );
 
                 // insert or assign to element
-                currentblock->globalVars[key_trimmed] = value_trimmed;
+                currentblock->insertPrefix(key_trimmed, value_trimmed);
 
 
             }
@@ -156,7 +186,9 @@ PunchFile_Ptr Reader::parsePUNCH(std::istream * const idevice)
         /* ********************* */
         if (!currentblock) {
             this->warn(lineCounter, "A header ('$' section) should prepend the data.");
-            currentblock = pch->appendBlock();
+
+            blocks.push_back( PunchBlock() );
+            currentblock = &(blocks.back());
         }
 
         /* Fields are 18 char-long */
@@ -169,46 +201,36 @@ PunchFile_Ptr Reader::parsePUNCH(std::istream * const idevice)
 
 
         if( startsWith(fields[0], string("-CONT-")) ) {
-            PunchRow *currentRow = currentblock->currentRow();
-            if (!currentRow) {
+            if (currentRow.size() == 0) {
                 this->warn(lineCounter, "A continued -CONT- field shouldn't starts a new block.");
-                currentRow = currentblock->appendRow();
             }
             /* skip fields[0] */
-            currentRow->push_back( fields[1] );
-            currentRow->push_back( fields[2] );
-            currentRow->push_back( fields[3] );
+            currentRow.push_back( fields[1] );
+            currentRow.push_back( fields[2] );
+            currentRow.push_back( fields[3] );
 
         } else {
-            /* Add a new row */
-            PunchRow *currentRow = currentblock->appendRow();
-            currentRow->push_back( fields[0] );
-            currentRow->push_back( fields[1] );
-            currentRow->push_back( fields[2] );
-            currentRow->push_back( fields[3] );
+            /* Flush */
+            trimRightRow( &currentRow );
+            currentblock->append( currentRow );
+            currentRow = PunchRow();
+
+            currentRow.push_back( fields[0] );
+            currentRow.push_back( fields[1] );
+            currentRow.push_back( fields[2] );
+            currentRow.push_back( fields[3] );
         }
     }
 
-    /* Clean the rows */
-    for (PunchBlock & block : pch->blocks()) {
-        for (PunchRow &row : block.rows()) {
-            trimRightRow( &row );
-        }
+    /* Flush */
+    trimRightRow( &currentRow );
+    currentblock->append( currentRow );
+    //currentRow = PunchRow();
+
+    for (PunchBlock & block : blocks) {
+        pch.append( block );
     }
 
     return pch;
-}
-
-/******************************************************************************
- ******************************************************************************/
-void Reader::trimRightRow(PunchRow * const row)
-{
-    if (!row) return;
-    int i = row->size();
-    while (i>0) {
-        --i;
-        if ( row->at(i) != "" ) return;
-        row->pop_back();
-    }
 }
 

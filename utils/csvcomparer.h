@@ -23,7 +23,7 @@ class CSVComparer
 {
 public:
     /* Compare two CSV streams */
-    static bool areStreamEqual(std::istream &stream1, std::istream &stream2 );
+    static bool areStreamEqual(std::istream &actual, std::istream &expected, std::string &message);
 
 private:
     static int getFileLineCount(std::istream &device);

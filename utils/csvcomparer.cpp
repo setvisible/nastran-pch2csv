@@ -15,9 +15,6 @@
  */
 #include "csvcomparer.h"
 
-#include <algorithm>
-#include <sstream>
-#include <string>
 #include <vector>
 
 using namespace std;
@@ -60,32 +57,45 @@ using namespace std;
  * In such case, \a areStreamEqual(file1, file2) will return \a true.
  *
  */
-bool CSVComparer::areStreamEqual( std::istream &stream1, std::istream &stream2 )
+bool CSVComparer::areStreamEqual(std::istream &actual, std::istream &expected, string &message)
 {
     /* Compare the sizes */
-    int size1 = getFileSize(stream1);
-    int size2 = getFileSize(stream2);
+    int size1 = getFileSize(actual);
+    int size2 = getFileSize(expected);
     if ( size1 <= 0 && size2 <= 0 ) {
         return true;
     }
 
     /* Compare the line numbers */
-    int lc1 = getFileLineCount(stream1);
-    int lc2 = getFileLineCount(stream2);
+    int lc1 = getFileLineCount(actual);
+    int lc2 = getFileLineCount(expected);
     if ( lc1 != lc2 ) {
+
+        message = "\n\n";
+        message += "actual.lineCount() == " + std::to_string(lc1) + "\n";
+        message += "expected.lineCount() == " + std::to_string(lc2) + "\n";
+
         return false;
     }
 
     /* Compare the contents */
+    int linecounter = 0;
     std::string line1;
     std::string line2;
-    while( std::getline( stream1, line1)
-           && std::getline( stream2, line2)){
+    while( std::getline( actual, line1)
+           && std::getline( expected, line2)){
+        linecounter++;
 
         std::string resolvedLine1 = resolve(line1);
         std::string resolvedLine2 = resolve(line2);
 
         if ( resolvedLine1 != resolvedLine2 ){
+
+            message = "\n\n";
+            message += "[line " + std::to_string(linecounter) + "] actual:   '" + resolvedLine1 + "'\n";
+            message += "\n";
+            message += "[line " + std::to_string(linecounter) + "] expected: '" + resolvedLine2 + "'\n";
+
             return false;
         }
     }
@@ -137,12 +147,12 @@ std::string CSVComparer::resolve(std::string &text)
 {
     auto p = text.begin();
 
-    /* Split by the comma */
+    /* Split by the commas */
     vector<string> vec;
     {
         string buf;
         while( p != text.end() ){
-            if ( (*p) == ',' ) {
+            if ( (*p) == ',' || (*p) == ';' ) {
                 vec.push_back(buf);
                 buf.clear();
                 ++p;

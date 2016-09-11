@@ -13,10 +13,11 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this program; If not, see <http://www.gnu.org/licenses/>.
  */
+
+#include <Utils/CSVComparer.h>
+
 #include <QtTest/QtTest>
 #include <QtCore/QDebug>
-
-#include <CSVComparer.h>
 
 using namespace std;
 
@@ -48,6 +49,7 @@ void tst_CSVComparer::test_areStreamEqual_data()
                                               << "double quoted 1,,double quoted 2,," << true;
     QTest::newRow("test_areStreamEqual_1006") << "rock'n'roll, '', 'yo'"
                                               << "rock'n'roll,'','yo'," << true;
+    QTest::newRow("test_areStreamEqual_1007") << "bla,bla" << "bla;bla" << true;
 
 
     /* ***************************** */
@@ -80,7 +82,8 @@ void tst_CSVComparer::test_areStreamEqual()
     std::istringstream buffer_2(_test_2, std::ios::in | std::ios::binary | std::ios::ate);
 
     // When
-    bool res = CSVComparer::areStreamEqual( buffer_1, buffer_2 );
+    string msg;
+    bool res = CSVComparer::areStreamEqual( buffer_1, buffer_2, msg );
 
     // Then
     QCOMPARE( res , areEquals );

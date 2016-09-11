@@ -1,2 +1,2 @@
 TEMPLATE=subdirs
-SUBDIRS += csvcomparer scanner
+SUBDIRS += csvcomparer filemanager scanner

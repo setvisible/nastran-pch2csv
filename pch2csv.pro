@@ -37,16 +37,16 @@ include($$PWD/version.pri)
 #-------------------------------------------------
 HEADERS  += \
     $$PWD/src/filemanager.h \
-    $$PWD/src/reader.h \
     $$PWD/src/punchfile.h \
+    $$PWD/src/reader.h \
+    $$PWD/src/qsystemdetection.h \
     $$PWD/src/writer.h \
-    $$PWD/src/systemdetection.h \
     $$PWD/src/version.h
 
 SOURCES += \
     $$PWD/src/filemanager.cpp \
-    $$PWD/src/reader.cpp \
     $$PWD/src/punchfile.cpp \
+    $$PWD/src/reader.cpp \
     $$PWD/src/writer.cpp \
     $$PWD/src/main.cpp
 

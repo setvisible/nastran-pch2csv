@@ -16,16 +16,36 @@
 #ifndef WRITER_H
 #define WRITER_H
 
-#include "punchfile.h"
-
 #include <ostream>
 #include <string>
 
+class PunchBlock;
+
 class Writer
 {
-public:
-    bool writeCSV(const PunchFile_Ptr pch, std::ostream * const odevice);
+    enum class HeaderType {
+        Default,
+        UserDefined,
+        NoHeader
+    };
 
+public:
+    explicit Writer();
+    explicit Writer(const std::string &columnHeaderLine, const bool skipColumnHeaders);
+
+    void enableHeader(const HeaderType enable);
+    void setHeader(const std::string &header);
+
+    bool writeCSV(PunchBlock &block, std::ostream * const odevice);
+
+    static inline const char* separator();
+    static inline const char* quote();
+    static inline const char* unknown();
+
+private:
+    HeaderType m_headerEnable;
+    std::string m_userDefinedHeader;
+    std::string m_previousLeftHeaders;
 };
 
 

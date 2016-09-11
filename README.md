@@ -30,9 +30,9 @@ Basically, it converts this:
 
 to this:
 
-    "TITLE","SUBTITLE","LABEL","SUBCASE ID",unknown,unknown,unknown,unknown,unknown,unknown,unknown,unknown,unknown,unknown,
-    "MY FEA MODEL","MY FIRST LOAD CASE","MY FIRST LOAD CASE","666",12345,80004230,BAR,,2.288704E+04,-3.404367E+03,1.639255E+03,-7.163730E+04,9.975631E+05,3.060709E+06,
-    "MY FEA MODEL","MY FIRST LOAD CASE","MY FIRST LOAD CASE","666",12345,80004231,BAR,,-2.301775E+04,-3.107557E+03,4.195733E+02,7.232352E+04,-9.979151E+05,-3.062225E+06,
+    "TITLE";"SUBTITLE";"LABEL";"SUBCASE ID";unknown;unknown;unknown;unknown;unknown;unknown;unknown;unknown;unknown;unknown;
+    "MY FEA MODEL";"MY FIRST LOAD CASE";"MY FIRST LOAD CASE";"666";12345;80004230;BAR;;2.288704E+04;-3.404367E+03;1.639255E+03;-7.163730E+04;9.975631E+05;3.060709E+06;
+    "MY FEA MODEL";"MY FIRST LOAD CASE";"MY FIRST LOAD CASE";"666";12345;80004231;BAR;;-2.301775E+04;-3.107557E+03;4.195733E+02;7.232352E+04;-9.979151E+05;-3.062225E+06;
 
 
 
@@ -59,12 +59,12 @@ It's not ideal but this allows a certain 'cleaning' of the data.
 In such case, the command:
 
     $ ./pch2csv input.pch -o output.csv
-    Warning: pch2csv detected 4 different formats in 'input.pch'.
+    Warning: pch2csv detected 4 different formats.
     Then, 4 files are produced.
 
 will produce these files:
 
-    output.csv
+    output_format_0.csv
     output_format_1.csv
     output_format_2.csv
     output_format_3.csv
@@ -161,12 +161,12 @@ __Options:__
 
  - `-o OUTPUT`, `--output=OUTPUT`
    Specify the name of the output file.
-   By default, the output takes the same name as the input, with the `.csv` extension
+   By default, the output takes the same name as the input, with `.csv` extension
 
  - `-c HEADER`, `--column-header=HEADER`
    Specify the csv header content. By default, the column headers are *unknown*.
    `HEADER` must be a sequence of words separated by commas,
-   surrounded by a double-quote, for instance: `-c "CBUSH ID,,CS,X in mm,Y [mm],CSout"`
+   surrounded by a double-quote, for instance: `-c "CBUSH ID;;CS;X in mm;Y [mm];CSout"`
 
  - `-s`, `--skip-header`
    Do not print the csv header. Data begins at the first line.

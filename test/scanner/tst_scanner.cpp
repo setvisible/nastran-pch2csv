@@ -14,13 +14,33 @@
  * License along with this program; If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "scanner.h"
-#include <CSVComparer.h>
+#include <Utils/TestSuite.h>
+#include <Reader.h>
+#include <Writer.h>
 
 #include <QtTest/QtTest>
 #include <QtCore/QDebug>
 
 using namespace std;
+
+static bool run(stringstream * const idevice, stringstream * const odevice)
+{
+    bool converted = true;
+
+    Reader reader;
+    PunchFile pch = reader.parsePUNCH(idevice);
+
+    Writer writer;
+    for (auto & key : pch.blockKeys()) {
+        auto br = pch.blockRange(key);
+        for (auto b = br.first; b != br.second; ++b) {
+            PunchBlock block = b->second;
+            converted &= writer.writeCSV(block, odevice);
+        }
+    }
+    return converted;
+}
+
 
 class tst_Scanner : public QObject
 {
@@ -77,15 +97,14 @@ void tst_Scanner::test_empty()
     std::string _content   = content.toStdString();
     std::stringstream buffer( _content );
 
-    Scanner scanner;
     std::stringstream actual;
     std::stringstream expected(""); /* Must be empty because it's not a valid Punch format */
 
     // When
-    scanner.convert( &buffer, &actual );
+    run( &buffer, &actual );
 
     // Then
-    QVERIFY( CSVComparer::areStreamEqual( actual, expected ) );
+    COMPARE_STREAM( actual, expected );
 }
 
 /******************************************************************************
@@ -93,7 +112,6 @@ void tst_Scanner::test_empty()
 void tst_Scanner::test_valid_simple()
 {
     // Given
-    Scanner scanner;
     std::stringstream buffer(
                 /*<--- 18 char ---><---- 18 char ---><---- 18 char ---><---- 18 char ---><8char->*/
                 "AAAAAAAAAAAAAAAAAABBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCDDDDDDDDDDDDDDDDDD99999999\n" );
@@ -108,18 +126,16 @@ void tst_Scanner::test_valid_simple()
                 );
 
     // When
-    scanner.convert( &buffer, &actual );
+    run( &buffer, &actual );
 
     // Then
-    QVERIFY( CSVComparer::areStreamEqual( actual, expected ) );
+    COMPARE_STREAM( actual, expected );
 }
 /******************************************************************************
  ******************************************************************************/
 void tst_Scanner::test_valid_continued()
 {
-    /* */
     // Given
-    Scanner scanner;
     std::stringstream buffer(
                 /*<--- 18 char ---><---- 18 char ---><---- 18 char ---><---- 18 char ---><8char->*/
                 "AAAAAAAAAAAAAAAAAABBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCDDDDDDDDDDDDDDDDDD99999999\n"
@@ -140,10 +156,10 @@ void tst_Scanner::test_valid_continued()
                 );
 
     // When
-    scanner.convert( &buffer, &actual );
+    run( &buffer, &actual );
 
     // Then
-    QVERIFY( CSVComparer::areStreamEqual( actual, expected ) );
+    COMPARE_STREAM( actual, expected );
 }
 
 /******************************************************************************
@@ -151,7 +167,6 @@ void tst_Scanner::test_valid_continued()
 void tst_Scanner::test_several_types()
 {
     // Given
-    Scanner scanner;
     std::stringstream buffer(
                 /*<--- 18 char ---><---- 18 char ---><---- 18 char ---><---- 18 char ---><8char->*/
                 "     80004231           7.232352E+04                                           1\n"
@@ -179,10 +194,10 @@ void tst_Scanner::test_several_types()
 
 
     // When
-    scanner.convert( &buffer, &actual );
+    run( &buffer, &actual );
 
     // Then
-    QVERIFY( CSVComparer::areStreamEqual( actual, expected ) );
+    COMPARE_STREAM( actual, expected );
 }
 
 /******************************************************************************
@@ -190,7 +205,6 @@ void tst_Scanner::test_several_types()
 void tst_Scanner::test_invalid()
 {
     // Given
-    Scanner scanner;
     std::stringstream buffer(
                 /*<--- 18 char ---><---- 18 char ---><---- 18 char ---><---- 18 char ---><8char->*/
                 "-cont-                  8.316166E+01  \n"
@@ -211,10 +225,10 @@ void tst_Scanner::test_invalid()
     std::stringstream expected(""); /* Must be empty because has no valid Punch line. */
 
     // When
-    scanner.convert( &buffer, &actual );
+    run( &buffer, &actual );
 
     // Then
-    QVERIFY( CSVComparer::areStreamEqual( actual, expected ) );
+    COMPARE_STREAM( actual, expected );
 }
 
 /******************************************************************************
@@ -223,7 +237,6 @@ void tst_Scanner::test_comment()
 {
     /* Here comments don't contain equal '=' symbols. Output must be empty. */
     // Given
-    Scanner scanner;
     std::stringstream buffer(
                 /*<--- 18 char ---><---- 18 char ---><---- 18 char ---><---- 18 char ---><8char->*/
                 "$ FIRST VALUE  DA DADA                                                         1\n"
@@ -238,10 +251,10 @@ void tst_Scanner::test_comment()
     std::stringstream expected("");
 
     // When
-    scanner.convert( &buffer, &actual );
+    run( &buffer, &actual );
 
     // Then
-    QVERIFY( CSVComparer::areStreamEqual( actual, expected ) );
+    COMPARE_STREAM( actual, expected );
 
 }
 
@@ -251,7 +264,6 @@ void tst_Scanner::test_comment_with_header()
 {
     /* Here comments contain equal '=' symbols, so the HEADERS are assigned. */
     // Given
-    Scanner scanner;
     std::stringstream buffer(
                 /*<--- 18 char ---><---- 18 char ---><---- 18 char ---><---- 18 char ---><8char->*/
                 "$ FIRST VALUE    = DA DADA                                                     1\n"
@@ -266,10 +278,10 @@ void tst_Scanner::test_comment_with_header()
     std::stringstream expected( "3rd value, FIRST VALUE, SECOND_VALUE\n" );
 
     // When
-    scanner.convert( &buffer, &actual );
+    run( &buffer, &actual );
 
     // Then
-    QVERIFY( CSVComparer::areStreamEqual( actual, expected ) );
+    COMPARE_STREAM( actual, expected );
 
 }
 
@@ -279,7 +291,6 @@ void tst_Scanner::test_unsorted_line_number()
 {
     /* Ending line numbers are optional. Moreover, they don't need to be continuous. */
     // Given
-    Scanner scanner;
     std::stringstream buffer(
                 /*<--- 18 char ---><---- 18 char ---><---- 18 char ---><---- 18 char ---><8char->*/
                 "     80004230          -3.404367E+03                                        1237\n"
@@ -299,18 +310,17 @@ void tst_Scanner::test_unsorted_line_number()
                                 "80004233, -9.844569E+06, , , -2.9784151+04 \n");
 
     // When
-    scanner.convert( &buffer, &actual );
+    run( &buffer, &actual );
 
     // Then
-    QVERIFY( CSVComparer::areStreamEqual( actual, expected ) );
+    COMPARE_STREAM( actual, expected );
 }
+
 /******************************************************************************
  ******************************************************************************/
 void tst_Scanner::test_valid_1()
 {
-    /* */
     // Given
-    Scanner scanner;
     std::stringstream buffer(
                 /*<--- 18 char ---><---- 18 char ---><---- 18 char ---><---- 18 char ---><8char->*/
                 "$Header1 = ID ELEMENT                                                          2\n"
@@ -342,19 +352,18 @@ void tst_Scanner::test_valid_1()
                 "ID ELEMENT, FX, FY, 777, 80004231, -9.844569E+06, , , -2.9784151+04 \n" );
 
     // When
-    scanner.convert( &buffer, &actual );
+    run( &buffer, &actual );
 
     // Then
-    QVERIFY( CSVComparer::areStreamEqual( actual, expected ) );
+    COMPARE_STREAM_X( actual, expected );
+
 }
 
 /******************************************************************************
  ******************************************************************************/
 void tst_Scanner::test_valid_simple_2()
 {
-
     // Given
-    Scanner scanner;
     std::stringstream buffer(
                 /*<--- 18 char ---><---- 18 char ---><---- 18 char ---><---- 18 char ---><8char->*/
                 "$TITLE   = MY FEA MODEL                                                        1\n"
@@ -382,10 +391,10 @@ void tst_Scanner::test_valid_simple_2()
                 "-9.979151E+05,-3.062225E+06,\n" );
 
     // When
-    scanner.convert( &buffer, &actual );
+    run( &buffer, &actual );
 
     // Then
-    QVERIFY( CSVComparer::areStreamEqual( actual, expected ) );
+    COMPARE_STREAM( actual, expected );
 }
 
 /******************************************************************************
@@ -393,7 +402,6 @@ void tst_Scanner::test_valid_simple_2()
 void tst_Scanner::test_several_types_in_a_single_input()
 {
     // Given
-    Scanner scanner;
     std::stringstream buffer(
                 /*<--- 18 char ---><---- 18 char ---><---- 18 char ---><---- 18 char ---><8char->*/
                 "$TITLE   = MY FEA MODEL                                                        1\n"
@@ -462,10 +470,10 @@ void tst_Scanner::test_several_types_in_a_single_input()
                 );
 
     // When
-    scanner.convert( &buffer, &actual );
+    run( &buffer, &actual );
 
     // Then
-    QVERIFY( CSVComparer::areStreamEqual( actual, expected ) );
+    COMPARE_STREAM( actual, expected );
 }
 
 /* *****************************************************************************

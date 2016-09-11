@@ -8,10 +8,10 @@ SOURCES     += tst_scanner.cpp
 INCLUDEPATH += ../../include
 
 # Dependancies:
-HEADERS += scanner.h
-SOURCES += scanner.cpp
 HEADERS += ../../utils/csvcomparer.h
 SOURCES += ../../utils/csvcomparer.cpp
+HEADERS += ../../utils/testsuite.h
+SOURCES += ../../utils/testsuite.cpp
 
 HEADERS += ../../src/reader.h
 SOURCES += ../../src/reader.cpp

@@ -16,44 +16,63 @@
 #ifndef PUNCH_FILE_H
 #define PUNCH_FILE_H
 
-#include <memory> // std::shared_ptr
-
-#include <string>
-#include <map>
-#include <list>
 #include <deque>
-
+#include <list>
+#include <map>
+#include <set>
+#include <string>
 
 typedef std::deque<std::string> PunchRow;
 
 class PunchBlock
 {
+    friend class PunchFile;
+
 public:
-    PunchRow* const appendRow();
-    PunchRow* currentRow();
+    explicit PunchBlock();
 
-    std::list<PunchRow>& rows() { return m_rows; }
+    /* Setters */
+    void insertPrefix(const std::string & key, const std::string & value);
+    void append(const PunchRow &row);
 
-    std::string filename;
-    std::map<std::string, std::string> globalVars;
+    /* Getters */
+    int prefixCount() const;
+    int columnCount() const;
+    int rowCount() const;
+    std::map<std::string, std::string> prefixRowAndHeader() const;
+    std::list<PunchRow> rows() const;
+
+protected:
+    std::string hash() const;
 
 private:
     std::list<PunchRow> m_rows;
+    std::map<std::string, std::string> m_prefixRowAndHeader;
 
 };
+
+typedef std::multimap<std::string, PunchBlock> PunchBlockMMap;
+typedef std::pair<PunchBlockMMap::const_iterator, PunchBlockMMap::const_iterator> PunchBlockRange;
 
 class PunchFile
 {
 public:
-    PunchBlock* const appendBlock();
-    std::list<PunchBlock>& blocks();
+    explicit PunchFile();
+
+    /* Setters */
+    void append(const PunchBlock &block);
+
+    /* Getters */
+    std::set<std::string> blockKeys() const;
+    PunchBlockRange blockRange(const std::string & key) const;
+
+    /* Operators */
+    PunchFile& operator+=(const PunchFile& other);
 
 private:
-    std::list<PunchBlock> m_blocks;
-
+    std::set<std::string> m_keys;
+    PunchBlockMMap m_blockMap;
 };
-
-typedef std::shared_ptr<PunchFile> PunchFile_Ptr;
 
 
 #endif // PUNCH_FILE_H

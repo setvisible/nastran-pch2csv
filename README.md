@@ -119,14 +119,14 @@ one per format found in the punch file(s).
 
      - On Windows (MinGW)
 
-            > mkdir -p build
+            > mkdir build
             > cd build/
             > cmake .. -G "MinGW Makefiles"
             > make -j4
 
      - On Windows (MSVC)
 
-            > mkdir -p build
+            > mkdir build
             > cd build/
             > cmake .. -G "Visual Studio 14 2015"
             > start .

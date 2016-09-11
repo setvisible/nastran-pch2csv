@@ -22,10 +22,16 @@ endif(NOT CMAKE_BUILD_TYPE)
 
 ### Sources
 set(MY_SOURCES
-    ./src/scanner.h
-    ./src/scanner.cpp
-    ./src/systemdetection.h
+    ./src/filemanager.h
+    ./src/punchfile.h
+    ./src/reader.h
+    ./src/qsystemdetection.h
+    ./src/writer.h
     ./src/version.h
+    ./src/filemanager.cpp
+    ./src/punchfile.cpp
+    ./src/reader.cpp
+    ./src/writer.cpp
     ./src/main.cpp
     )
 

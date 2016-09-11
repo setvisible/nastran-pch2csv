@@ -153,25 +153,25 @@ __Remarks:__
 
 __Options:__
 
- - `-h`, `--help`
+ - `-h`, `--help`    
    Show the help message and exit
 
- - `-v`, `--version`
+ - `-v`, `--version`    
    Show the version
 
- - `-o OUTPUT`, `--output=OUTPUT`
+ - `-o OUTPUT`, `--output=OUTPUT`    
    Specify the name of the output file.
    By default, the output takes the same name as the input, with `.csv` extension
 
- - `-c HEADER`, `--column-header=HEADER`
+ - `-c HEADER`, `--column-header=HEADER`    
    Specify the csv header content. By default, the column headers are *unknown*.
    `HEADER` must be a sequence of words separated by commas,
    surrounded by a double-quote, for instance: `-c "CBUSH ID;;CS;X in mm;Y [mm];CSout"`
 
- - `-s`, `--skip-header`
+ - `-s`, `--skip-header`    
    Do not print the csv header. Data begins at the first line.
 
- - `-u`, `--unique`
+ - `-u`, `--unique`    
    Force the tool to produce an unique csv, even if several element types / totals
    are detected.
 

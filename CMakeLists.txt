@@ -22,12 +22,6 @@ endif(NOT CMAKE_BUILD_TYPE)
 
 ### Sources
 set(MY_SOURCES
-    ./src/filemanager.h
-    ./src/punchfile.h
-    ./src/reader.h
-    ./src/qsystemdetection.h
-    ./src/writer.h
-    ./src/version.h
     ./src/filemanager.cpp
     ./src/punchfile.cpp
     ./src/reader.cpp
@@ -35,5 +29,5 @@ set(MY_SOURCES
     ./src/main.cpp
     )
 
-add_executable(pch2csv WIN32 ${MY_SOURCES})
+add_executable(pch2csv ${MY_SOURCES})
 

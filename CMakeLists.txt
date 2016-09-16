@@ -1,10 +1,10 @@
 project(pch2csv)
 
 ### Versioning
-set(pch2csv_VERSION_MAJOR "1")
-set(pch2csv_VERSION_MINOR "0")
-set(pch2csv_VERSION_PATCH "0")
-set(pch2csv_VERSION "${pch2csv_VERSION_MAJOR}.${pch2csv_VERSION_MINOR}.${pch2csv_VERSION_PATCH}")
+set(APP_VERSION_MAJOR "1")
+set(APP_VERSION_MINOR "0")
+set(APP_VERSION_PATCH "0")
+set(APP_VERSION "${APP_VERSION_MAJOR}.${APP_VERSION_MINOR}.${APP_VERSION_PATCH}")
 
 configure_file( ./src/config.h.cmake ./src/config.h )
 include_directories(${CMAKE_CURRENT_BINARY_DIR})

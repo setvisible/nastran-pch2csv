@@ -2,14 +2,18 @@
 
 ## Description
 
-A simple tool to convert [Nastran](https://en.wikipedia.org/wiki/Nastran "NASA Nastran") Punch format to [CSV](https://en.wikipedia.org/wiki/Comma-separated_values "Comma-Separated Values (CSV)").
+A simple tool to convert [Nastran](https://en.wikipedia.org/wiki/Nastran "NASA Nastran")
+Punch format into [CSV](https://en.wikipedia.org/wiki/Comma-separated_values "Comma-Separated Values (CSV)").
 
-It is written in C++ and uses the [standard library](https://en.wikipedia.org/wiki/C%2B%2B_Standard_Library "C++ standard library").
+It is written in C++ and uses the
+[C++ standard library](https://en.wikipedia.org/wiki/C%2B%2B_Standard_Library "C++ standard library").
 
 ## Features
 
-The tool reads a Nastran Punch file (`*.pch`) and converts its scary format to
-Comma-Separated Format (`*.csv`) readable by [Calc](https://en.wikipedia.org/wiki/LibreOffice_Calc "LibreOffice Calc") or [Excel](https://en.wikipedia.org/wiki/Microsoft_Excel "Microsoft Excel").
+The tool reads a Nastran Punch file (`*.pch`) and converts its scary format into
+Comma-Separated Values (`*.csv`) readable by
+[Calc](https://en.wikipedia.org/wiki/LibreOffice_Calc "LibreOffice Calc") or
+[Excel](https://en.wikipedia.org/wiki/Microsoft_Excel "Microsoft Excel").
 
 
 Basically, it converts this:
@@ -28,7 +32,7 @@ Basically, it converts this:
     -CONT-                  7.232352E+04     -9.979151E+05     -3.062225E+06      12
 
 
-to this:
+into this:
 
     "TITLE";"SUBTITLE";"LABEL";"SUBCASE ID";unknown;unknown;unknown;unknown;unknown;unknown;unknown;unknown;unknown;unknown;
     "MY FEA MODEL";"MY FIRST LOAD CASE";"MY FIRST LOAD CASE";"666";12345;80004230;BAR;;2.288704E+04;-3.404367E+03;1.639255E+03;-7.163730E+04;9.975631E+05;3.060709E+06;
@@ -38,23 +42,24 @@ to this:
 
 __Remark:__
 
-The **Natran solver** produces PUNCH file as a result of a [FEA](https://en.wikipedia.org/wiki/Finite_element_analysis "Finite Element Analysis (FEA)") if the `PUNCH` keyword replaces the default `PRINT` or `PLOT` in the output choices of
-the Finite Element model `CASE CONTROL` section.
+The **Nastran solver** produces a PUNCH file as result of a
+[FEA](https://en.wikipedia.org/wiki/Finite_element_analysis "Finite Element Analysis (FEA)")
+when the `PUNCH` keyword replaces the default `PRINT` or `PLOT` output option, which is defined in the Finite Element model `CASE CONTROL` section.
 
+For instance, Nastran creates a PUNCH file containing all the GRIDs displacement
+if the FE model file contains the line `DISPLACEMENT(SORT1,PUNCH,REAL)=ALL`
+in its `CASE CONTROL` section.
 
-For instance, if we want the displacement result as PUNCH file, we add
-`DISPLACEMENT(SORT1,PUNCH,REAL)=ALL` to the FE model `CASE CONTROL` section.
-
-Punch are sometimes more 'readable' than the F06 (`PRINT` default format).
+Punch are sometimes more 'readable' than the F06 (see `PRINT` default option).
 
 __Remark 2:__
 
-Punch formats aren't that bad, however since several types of elements
-(with different format!) can be stored inside (and also totals!),
-it can be tricky to convert them in a single table.
+Punch formats aren't that bad, however several types of elements
+(with different *formats*) can be stored inside (and also *totals*...),
+so it can sometimes be tricky to convert them easily into a single 2-dimensional table.
 
 The work-around found here is to output as many CSV as element / totals types there are.
-It's not ideal but this allows a certain 'cleaning' of the data.
+It's not ideal but this allows a better reorganisation of the data.
 
 In such case, the command:
 
@@ -69,33 +74,32 @@ will produce these files:
     output_format_2.csv
     output_format_3.csv
 
-Note that the tool **warns** when it meets the issue.
-This feature can be disabled with `-u`.
+Note that the tool emits **warnings** when such case appears.
+However this 'auto-split' feature can be disabled with `-u`.
 
 ## Under the hood
 
 ### Simple case
 
 The simplest case is given below.
-We have one Punch, containing one format.
-That gives a simple output file.
+One punch file containing one format of data, is converted into an unique CSV.
 
 ![Simple case](images/unique.png)
 
-### Concatenate the punch files in an unique output
+### Concatenate several punch files into an unique output
 
-If several files are proceeded, the tool concatenates them in an unique output file.
-This does too, if the `-u` flag is set.
+If several files are proceeded (i.e. with the command `pch2csv file1 file2 file3`),
+the tool concatenates them into an unique CSV if they only contain *one format* of data.
+If not (i.e. when several formats are detected), pch2scv outputs one CSV file per format, except if the option `-u` is used.
 
 ![Concatenate the Punch](images/concat.png)
 
-### Split formats in separated files
+### Split formats to separated files
 
-If the `-u` flag is **not** set, the tool might output several files,
-one per format found in the punch file(s).
+If the `-u` flag isn't specified, the tool writes each *format*
+from Punch files to a separated CSV.
 
 ![Formats](images/combo.png)
-
 
 
 ## Build
@@ -146,9 +150,9 @@ On Windows
 
 __Remarks:__
 
- - If already existing, the output file **isn't** overwritten.
-   Instead, the tool creates a backup of the file with an incremental filename.
- - Additionally, the tool writes the CSV with column titles with option `-c HEADER`.
+ - By default, CSV aren't overwritten.
+   Instead, *pch2csv* increments the former CSV (backup).
+ - Additionally, *pch2csv* writes user-defined column titles in CSV with `-c` option.
 
 
 __Options:__
@@ -163,34 +167,31 @@ __Options:__
    Specify the name of the output file.
    By default, the output takes the same name as the input, with `.csv` extension
 
- - `-c HEADER`, `--column-header=HEADER`    
+ - `-c %HEADER%`, `--column-header=%HEADER%`    
    Specify the csv header content. By default, the column headers are *unknown*.
-   `HEADER` must be a sequence of words separated by commas,
+   %HEADER% must be a sequence of words separated by commas,
    surrounded by a double-quote, for instance: `-c "CBUSH ID;;CS;X in mm;Y [mm];CSout"`
 
  - `-s`, `--skip-header`    
    Do not print the csv header. Data begins at the first line.
 
  - `-u`, `--unique`    
-   Force the tool to produce an unique csv, even if several element types / totals
-   are detected.
+   Force the tool to produce an unique csv, even if several formats are detected.
 
 
 ## Similar work from Github's Community
 
 At the time of writing these lines, some interesting things about
-Nastran and PUNCH files can be found in Github:
+Nastran and PUNCH files can be found on Github:
 
  - The **nastran\_pch\_reader** by anick107, a Python Parser for PUNCH files:
  [https://github.com/anick107/nastran\_pch\_reader](https://github.com/anick107/nastran\_pch\_reader)
 
  - The **pyNastran** by SteveDoyle2, a Python-based interface tool for Nastran's file formats:
  [https://github.com/SteveDoyle2/pyNastran](https://github.com/SteveDoyle2/pyNastran)
- (especially the pyNastran/bdf/test/unit/test\_read\_write.py)
+ (in particular, see pyNastran/bdf/test/unit/test\_read\_write.py)
 
- - other?
-
-(!) punch files found there are used for testing this tool.
+Punch files found in those projects are used here, mainly for demo and unit testing.
 
 ## License
 

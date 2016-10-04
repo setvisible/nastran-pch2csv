@@ -216,8 +216,11 @@ void tst_Scanner::test_invalid()
                 "-> not valid because has 80 characters exactly but no ending line number...    \n"
                 "-> it's not a valid Punch line because has 79 characters...                  1\n"
                 "-> it's not a valid Punch line because has 81 characters...                    1 \n"
+                "-> it's not a valid Punch line because has 81 characters...                    1 \r"
+                "-> it's not a valid Punch line because has 82 characters...                    1 \r\n"
                 "\n"
-                "\n"
+                "\r"
+                "\r\n"
                 "!!! BUT IT'S NOT A PUNCH !!!\n"
                 );
 

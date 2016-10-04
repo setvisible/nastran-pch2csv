@@ -112,9 +112,22 @@ static void trimRightRow(PunchRow * const row)
     if (!row) return;
     int i = row->size();
     while (i>0) {
-        --i;
+        i--;
         if ( row->at(i) != "" ) return;
         row->pop_back();
+    }
+}
+
+/******************************************************************************
+ ******************************************************************************/
+/*! \brief Remove all the ending CR, LF or CR+LF in the given \a line.
+ */
+static inline void removeLineCarriage(std::string *line)
+{
+    auto p = line->end() - 1;
+    while ( (*p) == '\r' || (*p) == '\n' ) {
+        line->pop_back();
+        p = line->end() - 1;
     }
 }
 
@@ -138,10 +151,10 @@ PunchFile Reader::parsePUNCH(std::istream * const idevice)
     while( std::getline((*idevice), line) ) {
 
         ++lineCounter;
+        removeLineCarriage( &line );
 
-        /* Not a punch line */
-        if (line.length() != 80) {
-            this->warn(lineCounter, "A line should have at least 80 characters.");
+        if ( line.length() != 80 ) {
+            this->warn(lineCounter, "The line must be 80 characters long.");
             continue;
         }
 
@@ -172,10 +185,7 @@ PunchFile Reader::parsePUNCH(std::istream * const idevice)
                 string key_trimmed   = trim(key, " \t");
                 string value_trimmed = trim(value, " \t" );
 
-                // insert or assign to element
                 currentblock->insertPrefix(key_trimmed, value_trimmed);
-
-
             }
             continue;
         }
@@ -204,7 +214,7 @@ PunchFile Reader::parsePUNCH(std::istream * const idevice)
             if (currentRow.size() == 0) {
                 this->warn(lineCounter, "A continued -CONT- field shouldn't starts a new block.");
             }
-            /* skip fields[0] */
+            /* fields[0] isn't used. */
             currentRow.push_back( fields[1] );
             currentRow.push_back( fields[2] );
             currentRow.push_back( fields[3] );
@@ -225,7 +235,6 @@ PunchFile Reader::parsePUNCH(std::istream * const idevice)
     /* Flush */
     trimRightRow( &currentRow );
     currentblock->append( currentRow );
-    //currentRow = PunchRow();
 
     for (PunchBlock & block : blocks) {
         pch.append( block );

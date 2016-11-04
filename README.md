@@ -118,7 +118,7 @@ from Punch files to a separated CSV.
             $ mkdir -p build
             $ cd build/
             $ cmake ..
-            $ make -j4
+            $ make
             $ make install
 
      - On Windows (MinGW)
@@ -126,7 +126,7 @@ from Punch files to a separated CSV.
             > mkdir build
             > cd build/
             > cmake .. -G "MinGW Makefiles"
-            > make -j4
+            > make
 
      - On Windows (MSVC)
 

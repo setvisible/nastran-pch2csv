@@ -8,6 +8,19 @@ Punch format into [CSV](https://en.wikipedia.org/wiki/Comma-separated_values "Co
 It is written in C++ and uses the
 [C++ standard library](https://en.wikipedia.org/wiki/C%2B%2B_Standard_Library "C++ standard library").
 
+## History
+
+The Nastran Punch Format inherits from the punched cards.
+
++ A punch card:
+
+![Punched card (wikipedia)](doc/320px-Blue-punch-card-front-horiz.png)
+
+
+[https://en.wikipedia.org/wiki/Punched_card_input/output](https://en.wikipedia.org/wiki/Punched_card_input/output "https://en.wikipedia.org/wiki/Punched_card_input/output")
+[https://en.wikipedia.org/wiki/Punched_cards](https://en.wikipedia.org/wiki/Punched_cards "https://en.wikipedia.org/wiki/Punched_cards")
+
+
 ## Features
 
 The tool reads a Nastran Punch file (`*.pch`) and converts its scary format into

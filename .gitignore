@@ -5,6 +5,7 @@
 /.*
 /*
 !/deployment
+!/doc
 !/examples
 !/images
 !/include
